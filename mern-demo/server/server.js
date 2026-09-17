@@ -3,9 +3,12 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 require('dotenv').config();
 
+const Student = require('./Student');
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Middleware
 app.use(cors());
 app.use(express.json());
 
@@ -14,16 +17,12 @@ mongoose.connect(process.env.MONGODB_URI)
     .then(() => console.log("Đã kết nối MongoDB Atlas thành công!"))
     .catch((err) => console.log("Lỗi kết nối:", err));
 
+// Route kiểm tra
 app.get('/api/hello', (req, res) => {
     res.json({ message: "Backend đang hoạt động!" });
 });
 
-app.listen(PORT, () => {
-    console.log(`Server đang chạy trên port ${PORT}`);
-});
-const Student = require('./Student');
-
-// Câu 36: Lấy danh sách sinh viên
+// Lấy danh sách sinh viên
 app.get('/api/students', async (req, res) => {
     try {
         const students = await Student.find();
@@ -33,7 +32,7 @@ app.get('/api/students', async (req, res) => {
     }
 });
 
-// Câu 37: Thêm sinh viên
+// Thêm sinh viên
 app.post('/api/students', async (req, res) => {
     try {
         const newStudent = await Student.create(req.body);
@@ -43,22 +42,37 @@ app.post('/api/students', async (req, res) => {
     }
 });
 
-// Câu 38: Cập nhật sinh viên
+// Cập nhật sinh viên
 app.put('/api/students/:id', async (req, res) => {
     try {
-        const updatedStudent = await Student.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        const updatedStudent = await Student.findByIdAndUpdate(
+            req.params.id, 
+            req.body, 
+            { new: true, runValidators: true }
+        );
+        if (!updatedStudent) {
+            return res.status(404).json({ message: "Không tìm thấy sinh viên!" });
+        }
         res.status(200).json(updatedStudent);
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
 });
 
-// Câu 39: Xóa sinh viên
+// Xóa sinh viên
 app.delete('/api/students/:id', async (req, res) => {
     try {
-        await Student.findByIdAndDelete(req.params.id);
-        res.status(200).json({ message: "Đã xóa sinh viên" });
+        const deletedStudent = await Student.findByIdAndDelete(req.params.id);
+        if (!deletedStudent) {
+            return res.status(404).json({ message: "Không tìm thấy sinh viên!" });
+        }
+        res.status(200).json({ message: "Đã xóa sinh viên thành công!" });
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
+});
+
+// Khởi chạy server (LUÔN ĐẶT Ở CUỐI CÙNG)
+app.listen(PORT, () => {
+    console.log(`Server đang chạy trên port ${PORT}`);
 });

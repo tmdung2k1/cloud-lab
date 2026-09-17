@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
-import './App.css'; // Nhập tệp CSS bên ngoài
+import './App.css';
 
 function App() {
   const [students, setStudents] = useState([]);
   const [formData, setFormData] = useState({ studentId: '', name: '', email: '' });
+  const [editingId, setEditingId] = useState(null); // Lưu ID sinh viên đang sửa
 
-  // Đặt URL Backend của bạn vào biến này
-  const API_URL = 'https://reimagined-meme-5gvvpr74vvgwh7j4-5000.app.github.dev/api/students';
+  const API_URL = 'http://localhost:5000/api/students';
 
-  // Câu 47: Lấy danh sách
+  // Lấy danh sách
   const fetchStudents = async () => {
     try {
       const response = await fetch(API_URL);
@@ -23,24 +23,57 @@ function App() {
     fetchStudents();
   }, []);
 
-  // Xử lý nhập liệu form
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Câu 48 & 49: Gửi dữ liệu POST
+  // Thêm mới hoặc Cập nhật sinh viên
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      });
-      setFormData({ studentId: '', name: '', email: '' }); // Reset form
-      fetchStudents(); // Cập nhật lại danh sách ngay lập tức
+      if (editingId) {
+        // Gửi PUT khi đang ở chế độ sửa
+        await fetch(`${API_URL}/${editingId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData)
+        });
+        setEditingId(null);
+      } else {
+        // Gửi POST khi thêm mới
+        await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData)
+        });
+      }
+      setFormData({ studentId: '', name: '', email: '' });
+      fetchStudents();
     } catch (error) {
-      console.error("Lỗi khi thêm sinh viên:", error);
+      console.error("Lỗi khi lưu sinh viên:", error);
+    }
+  };
+
+  // Đưa thông tin sinh viên lên form để sửa
+  const handleEdit = (student) => {
+    setEditingId(student._id);
+    setFormData({
+      studentId: student.studentId,
+      name: student.name,
+      email: student.email
+    });
+  };
+
+  // Xóa sinh viên
+  const handleDelete = async (id) => {
+    if (!window.confirm("Bạn có chắc chắn muốn xóa sinh viên này?")) return;
+    try {
+      await fetch(`${API_URL}/${id}`, {
+        method: 'DELETE'
+      });
+      fetchStudents();
+    } catch (error) {
+      console.error("Lỗi khi xóa sinh viên:", error);
     }
   };
 
@@ -52,55 +85,69 @@ function App() {
 
       <div className="main-card">
         <div className="card-header">
-          <span className="card-header-icon">🎓</span> {/* Biểu tượng mũ unicode */}
+          <span className="card-header-icon">🎓</span>
           <h1>Quản lý Sinh viên</h1>
         </div>
 
         <div className="form-section">
           <div className="sub-header">
-            Thêm Sinh viên Mới
+            {editingId ? "Cập nhật Thông tin Sinh viên" : "Thêm Sinh viên Mới"}
           </div>
-          
-          {/* Câu 48: Form */}
+
           <form onSubmit={handleSubmit}>
             <div className="add-student-grid">
               <div className="input-group">
                 <label htmlFor="studentId">Mã số Sinh viên:</label>
-                <input 
+                <input
                   id="studentId"
-                  name="studentId" 
-                  placeholder="Ví dụ: 236912" 
-                  value={formData.studentId} 
-                  onChange={handleChange} 
-                  required 
+                  name="studentId"
+                  placeholder="Ví dụ: 236912"
+                  value={formData.studentId}
+                  onChange={handleChange}
+                  required
                 />
               </div>
               <div className="input-group">
                 <label htmlFor="name">Họ tên Sinh viên:</label>
-                <input 
+                <input
                   id="name"
-                  name="name" 
-                  placeholder="Ví dụ: Nguyễn Văn Dũng" 
-                  value={formData.name} 
-                  onChange={handleChange} 
-                  required 
+                  name="name"
+                  placeholder="Ví dụ: Nguyễn Văn Dũng"
+                  value={formData.name}
+                  onChange={handleChange}
+                  required
                 />
               </div>
               <div className="input-group full-width-grid">
                 <label htmlFor="email">Email Liên hệ:</label>
-                <input 
+                <input
                   id="email"
-                  name="email" 
-                  placeholder="Ví dụ: dung@example.com" 
-                  value={formData.email} 
-                  onChange={handleChange} 
-                  required 
+                  name="email"
+                  placeholder="Ví dụ: dung@example.com"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
                 />
               </div>
             </div>
-            
-            <div className="add-btn-container">
-              <button type="submit" className="add-btn">Thêm sinh viên</button>
+
+            <div className="add-btn-container" style={{ display: 'flex', gap: '8px' }}>
+              <button type="submit" className="add-btn">
+                {editingId ? "Lưu thay đổi" : "Thêm sinh viên"}
+              </button>
+              {editingId && (
+                <button
+                  type="button"
+                  className="add-btn"
+                  style={{ backgroundColor: '#6c757d' }}
+                  onClick={() => {
+                    setEditingId(null);
+                    setFormData({ studentId: '', name: '', email: '' });
+                  }}
+                >
+                  Hủy
+                </button>
+              )}
             </div>
           </form>
         </div>
@@ -110,7 +157,6 @@ function App() {
             Danh sách Sinh viên Hiện có
           </div>
 
-          {/* Danh sách */}
           <table className="student-table">
             <thead>
               <tr>
@@ -123,15 +169,15 @@ function App() {
             </thead>
             <tbody>
               {students.map((student, index) => (
-                <tr key={student._id}>
+                <tr key={student._id || index}>
                   <td>{index + 1}</td>
                   <td>{student.studentId}</td>
                   <td>{student.name}</td>
                   <td>{student.email}</td>
                   <td>
                     <div className="action-icons">
-                      <span>✏️</span> {/* Biểu tượng bút chì giả */}
-                      <span>🗑️</span> {/* Biểu tượng thùng rác giả */}
+                      <button onClick={() => handleEdit(student)}>✏️</button>
+                      <button onClick={() => handleDelete(student._id)}>🗑️</button>
                     </div>
                   </td>
                 </tr>
