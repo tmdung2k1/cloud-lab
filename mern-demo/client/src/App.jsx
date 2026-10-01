@@ -106,8 +106,7 @@ function App() {
 
       <div className="main-card">
         <div className="card-header">
-          <span className="card-header-icon">🎓</span>
-          <h1>Quản lý Sinh viên</h1>
+          <h1>MERN Stack Application - Version 2.0</h1>
         </div>
 
         <div className="form-section">
@@ -197,16 +196,16 @@ function App() {
                   <td>{student.email}</td>
                   <td>
                     <div className="action-icons">
-                      <button 
-                        type="button" 
+                      <button
+                        type="button"
                         className="btn-action btn-edit"
                         onClick={() => handleEdit(student)}
                         title="Sửa"
                       >
                         ✏️
                       </button>
-                      <button 
-                        type="button" 
+                      <button
+                        type="button"
                         className="btn-action btn-delete"
                         onClick={() => handleDelete(student._id || student.studentId)}
                         title="Xóa"

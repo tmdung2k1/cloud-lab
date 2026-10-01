@@ -11,7 +11,7 @@ services:
     restart: always
 
   frontend:
-    image: tmdung0910/mern-frontend:1.0 # Câu 52
+    image: tmdung0910/mern-frontend:2.0
     ports:
       - "3000:3000"                              # Câu 54 
     environment:
