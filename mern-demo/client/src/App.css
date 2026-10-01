@@ -151,13 +151,33 @@ body {
 
 .action-icons {
   display: flex;
-  gap: 10px;
-  color: #666;
-  cursor: pointer;
+  gap: 8px;
+  align-items: center;
 }
 
-.action-icons span:hover {
-  color: #333;
+.btn-action {
+  background-color: #f8f9fa;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-edit:hover {
+  background-color: #e0f2fe;
+  border-color: #38bdf8;
+  transform: translateY(-1px);
+}
+
+.btn-delete:hover {
+  background-color: #fee2e2;
+  border-color: #f87171;
+  transform: translateY(-1px);
 }
 
 .browser-footer {

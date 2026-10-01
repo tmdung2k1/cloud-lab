@@ -31,49 +31,70 @@ function App() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      let response;
       if (editingId) {
         // Gửi PUT khi đang ở chế độ sửa
-        await fetch(`${API_URL}/${editingId}`, {
+        response = await fetch(`${API_URL}/${editingId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(formData)
         });
-        setEditingId(null);
       } else {
         // Gửi POST khi thêm mới
-        await fetch(API_URL, {
+        response = await fetch(API_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(formData)
         });
       }
+
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        alert(`Lỗi: ${err.message || 'Không thể lưu sinh viên!'}`);
+        return;
+      }
+
+      setEditingId(null);
       setFormData({ studentId: '', name: '', email: '' });
       fetchStudents();
     } catch (error) {
       console.error("Lỗi khi lưu sinh viên:", error);
+      alert("Không thể kết nối tới server!");
     }
   };
 
   // Đưa thông tin sinh viên lên form để sửa
   const handleEdit = (student) => {
-    setEditingId(student._id);
+    const idToEdit = student._id || student.studentId;
+    setEditingId(idToEdit);
     setFormData({
       studentId: student.studentId,
       name: student.name,
       email: student.email
     });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   // Xóa sinh viên
   const handleDelete = async (id) => {
+    if (!id) {
+      alert("Không tìm thấy mã định danh sinh viên để xóa!");
+      return;
+    }
     if (!window.confirm("Bạn có chắc chắn muốn xóa sinh viên này?")) return;
     try {
-      await fetch(`${API_URL}/${id}`, {
+      const response = await fetch(`${API_URL}/${id}`, {
         method: 'DELETE'
       });
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        alert(`Lỗi: ${err.message || 'Không thể xóa sinh viên!'}`);
+        return;
+      }
       fetchStudents();
     } catch (error) {
       console.error("Lỗi khi xóa sinh viên:", error);
+      alert("Không thể kết nối tới server khi xóa!");
     }
   };
 
@@ -169,15 +190,29 @@ function App() {
             </thead>
             <tbody>
               {students.map((student, index) => (
-                <tr key={student._id || index}>
+                <tr key={student._id || student.studentId || index}>
                   <td>{index + 1}</td>
                   <td>{student.studentId}</td>
                   <td>{student.name}</td>
                   <td>{student.email}</td>
                   <td>
                     <div className="action-icons">
-                      <button onClick={() => handleEdit(student)}>✏️</button>
-                      <button onClick={() => handleDelete(student._id)}>🗑️</button>
+                      <button 
+                        type="button" 
+                        className="btn-action btn-edit"
+                        onClick={() => handleEdit(student)}
+                        title="Sửa"
+                      >
+                        ✏️
+                      </button>
+                      <button 
+                        type="button" 
+                        className="btn-action btn-delete"
+                        onClick={() => handleDelete(student._id || student.studentId)}
+                        title="Xóa"
+                      >
+                        🗑️
+                      </button>
                     </div>
                   </td>
                 </tr>

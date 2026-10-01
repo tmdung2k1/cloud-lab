@@ -1,7 +1,14 @@
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
+const path = require('path');
 require('dotenv').config();
+if (!process.env.MONGODB_URI) {
+    require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
+}
+if (!process.env.MONGODB_URI) {
+    require('dotenv').config({ path: path.resolve(__dirname, '.env') });
+}
 
 const Student = require('./Student');
 
@@ -42,13 +49,18 @@ app.post('/api/students', async (req, res) => {
     }
 });
 
-// Cập nhật sinh viên
+// Cập nhật sinh viên (hỗ trợ cả MongoDB _id lẫn studentId/MSSV)
 app.put('/api/students/:id', async (req, res) => {
     try {
-        const updatedStudent = await Student.findByIdAndUpdate(
-            req.params.id, 
+        const id = req.params.id;
+        const filter = mongoose.Types.ObjectId.isValid(id)
+            ? { $or: [{ _id: id }, { studentId: id }] }
+            : { studentId: id };
+
+        const updatedStudent = await Student.findOneAndUpdate(
+            filter, 
             req.body, 
-            { new: true, runValidators: true }
+            { returnDocument: 'after', runValidators: true }
         );
         if (!updatedStudent) {
             return res.status(404).json({ message: "Không tìm thấy sinh viên!" });
@@ -59,10 +71,15 @@ app.put('/api/students/:id', async (req, res) => {
     }
 });
 
-// Xóa sinh viên
+// Xóa sinh viên (hỗ trợ cả MongoDB _id lẫn studentId/MSSV)
 app.delete('/api/students/:id', async (req, res) => {
     try {
-        const deletedStudent = await Student.findByIdAndDelete(req.params.id);
+        const id = req.params.id;
+        const filter = mongoose.Types.ObjectId.isValid(id)
+            ? { $or: [{ _id: id }, { studentId: id }] }
+            : { studentId: id };
+
+        const deletedStudent = await Student.findOneAndDelete(filter);
         if (!deletedStudent) {
             return res.status(404).json({ message: "Không tìm thấy sinh viên!" });
         }
