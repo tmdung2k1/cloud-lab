@@ -12,8 +12,11 @@ function App() {
   const fetchStudents = async () => {
     try {
       const response = await fetch(API_URL);
+      if (!response.ok) {
+        throw new Error(`Máy chủ phản hồi mã lỗi ${response.status} (${response.statusText})`);
+      }
       const data = await response.json();
-      setStudents(data);
+      setStudents(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Lỗi khi tải danh sách:", error);
     }
