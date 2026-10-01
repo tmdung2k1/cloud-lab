@@ -6,7 +6,7 @@ function App() {
   const [formData, setFormData] = useState({ studentId: '', name: '', email: '' });
   const [editingId, setEditingId] = useState(null); // Lưu ID sinh viên đang sửa
 
-  const API_URL = 'http://localhost:5000/api/students';
+  const API_URL = import.meta.env.VITE_API_URL || '/api/students';
 
   // Lấy danh sách
   const fetchStudents = async () => {

@@ -14,6 +14,8 @@ services:
     image: tmdung0910/mern-frontend:1.0 # Câu 52
     ports:
       - "3000:3000"                              # Câu 54 
+    environment:
+      - BACKEND_URL=http://backend:5000
     depends_on:
       - backend
     restart: always
