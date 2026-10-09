@@ -7,6 +7,10 @@ RUN npm install
 
 COPY . .
 
+# Build production bundle, then serve it with `vite preview`
+# (preview uses allowedHosts/proxy/PORT from vite.config.ts)
+RUN npm run build
+
 EXPOSE 3000
 
-CMD ["npx", "vite", "--host", "0.0.0.0", "--port", "3000", "--cors"]
+CMD ["npm", "run", "preview"]

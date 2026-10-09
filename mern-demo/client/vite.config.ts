@@ -20,8 +20,8 @@ const proxy = {
   },
 }
 
-// '.onrender.com' allows every *.onrender.com subdomain
-const allowedHosts = ['.onrender.com', 'localhost']
+// Allow every host (Render domain, custom domains, localhost...)
+const allowedHosts = true as const
 
 export default defineConfig({
   plugins: [react()],
