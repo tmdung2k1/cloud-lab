@@ -6,9 +6,9 @@ function App() {
   const [formData, setFormData] = useState({ studentId: '', name: '', email: '' });
   const [editingId, setEditingId] = useState(null);
 
-  // Lấy Base URL từ biến môi trường, fallback về link Render của Backend
-  const BASE_URL = import.meta.env.VITE_API_URL || 'https://mern-backend-236912.onrender.com';
-  const API_ENDPOINT = `${BASE_URL}/api/students`;
+  // Luôn gọi đường dẫn tương đối; Vite proxy (vite.config.ts) sẽ chuyển tiếp
+  // /api tới backend phù hợp (Docker, local hoặc Render) => không lỗi localhost/CORS
+  const API_ENDPOINT = '/api/students';
 
   // Lấy danh sách
  const fetchStudents = async () => {
