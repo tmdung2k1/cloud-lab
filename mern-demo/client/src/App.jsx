@@ -11,18 +11,18 @@ function App() {
   const API_ENDPOINT = `${BASE_URL}/api/students`;
 
   // Lấy danh sách
-  const fetchStudents = async () => {
-    try {
-      const response = await fetch(API_ENDPOINT);
-      if (!response.ok) {
-        throw new Error(`Máy chủ phản hồi mã lỗi ${response.status} (${response.statusText})`);
-      }
-      const data = await response.json();
-      setStudents(Array.isArray(data) ? data : []);
-    } catch (error) {
-      console.error("Lỗi khi tải danh sách:", error);
+ const fetchStudents = async () => {
+  try {
+    const response = await fetch(API_ENDPOINT);
+    if (!response.ok) {
+      throw new Error(`Máy chủ phản hồi mã lỗi ${response.status}`);
     }
-  };
+    const data = await response.json();
+    setStudents(Array.isArray(data) ? data : []);
+  } catch (error) {
+    console.error("Lỗi khi tải danh sách:", error);
+  }
+};
 
   useEffect(() => {
     fetchStudents();
