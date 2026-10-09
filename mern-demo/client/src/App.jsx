@@ -4,14 +4,16 @@ import './App.css';
 function App() {
   const [students, setStudents] = useState([]);
   const [formData, setFormData] = useState({ studentId: '', name: '', email: '' });
-  const [editingId, setEditingId] = useState(null); // Lưu ID sinh viên đang sửa
+  const [editingId, setEditingId] = useState(null);
 
-  const API_URL = import.meta.env.VITE_API_URL || '/api/students';
+  // Lấy Base URL từ biến môi trường, fallback về link Render của Backend
+  const BASE_URL = import.meta.env.VITE_API_URL || 'https://mern-backend-236912.onrender.com';
+  const API_ENDPOINT = `${BASE_URL}/api/students`;
 
   // Lấy danh sách
   const fetchStudents = async () => {
     try {
-      const response = await fetch(API_URL);
+      const response = await fetch(API_ENDPOINT);
       if (!response.ok) {
         throw new Error(`Máy chủ phản hồi mã lỗi ${response.status} (${response.statusText})`);
       }
@@ -36,15 +38,13 @@ function App() {
     try {
       let response;
       if (editingId) {
-        // Gửi PUT khi đang ở chế độ sửa
-        response = await fetch(`${API_URL}/${editingId}`, {
+        response = await fetch(`${API_ENDPOINT}/${editingId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(formData)
         });
       } else {
-        // Gửi POST khi thêm mới
-        response = await fetch(API_URL, {
+        response = await fetch(API_ENDPOINT, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(formData)
@@ -86,7 +86,7 @@ function App() {
     }
     if (!window.confirm("Bạn có chắc chắn muốn xóa sinh viên này?")) return;
     try {
-      const response = await fetch(`${API_URL}/${id}`, {
+      const response = await fetch(`${API_ENDPOINT}/${id}`, {
         method: 'DELETE'
       });
       if (!response.ok) {
