@@ -14,9 +14,30 @@ const Student = require('./Student');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+    console.log(`=== MERN Backend v1.2 Auto-Deployed on port ${PORT} ===`);
+});
 
 // Middleware
-app.use(cors());
+const allowedOrigins = [
+    process.env.CLIENT_URL,
+    'http://localhost:5173',
+    'http://localhost:3000'
+];
+
+app.use(cors({
+    origin: function (origin, callback) {
+        // Cho phép gọi nếu không có origin (ví dụ Postman/curl) 
+        // hoặc origin nằm trong danh sách whitelist
+        if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV !== 'production') {
+            callback(null, true);
+        } else {
+            callback(new Error('Chặn bởi chính sách CORS'));
+        }
+    },
+    credentials: true
+}));
+
 app.use(express.json());
 
 // Kết nối MongoDB Atlas
@@ -58,8 +79,8 @@ app.put('/api/students/:id', async (req, res) => {
             : { studentId: id };
 
         const updatedStudent = await Student.findOneAndUpdate(
-            filter, 
-            req.body, 
+            filter,
+            req.body,
             { returnDocument: 'after', runValidators: true }
         );
         if (!updatedStudent) {
@@ -87,6 +108,14 @@ app.delete('/api/students/:id', async (req, res) => {
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
+});
+// Health Check Endpoint cho Cloud PaaS Monitoring
+app.get('/health', (req, res) => {
+    res.status(200).json({
+        status: 'UP',
+        timestamp: new Date(),
+        uptime: process.uptime()
+    });
 });
 
 // Khởi chạy server (LUÔN ĐẶT Ở CUỐI CÙNG)

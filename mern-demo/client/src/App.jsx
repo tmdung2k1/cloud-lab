@@ -6,23 +6,23 @@ function App() {
   const [formData, setFormData] = useState({ studentId: '', name: '', email: '' });
   const [editingId, setEditingId] = useState(null);
 
-  // Luôn gọi đường dẫn tương đối; Vite proxy (vite.config.ts) sẽ chuyển tiếp
-  // /api tới backend phù hợp (Docker, local hoặc Render) => không lỗi localhost/CORS
+  // Câu 33: Dùng đường dẫn tương đối /api/students
+  // Vite Proxy (hoặc Reverse Proxy) sẽ ngầm chuyển tiếp sang Backend
   const API_ENDPOINT = '/api/students';
 
-  // Lấy danh sách
- const fetchStudents = async () => {
-  try {
-    const response = await fetch(API_ENDPOINT);
-    if (!response.ok) {
-      throw new Error(`Máy chủ phản hồi mã lỗi ${response.status}`);
+  // Lấy danh sách sinh viên
+  const fetchStudents = async () => {
+    try {
+      const response = await fetch(API_ENDPOINT);
+      if (!response.ok) {
+        throw new Error(`Máy chủ phản hồi mã lỗi ${response.status}`);
+      }
+      const data = await response.json();
+      setStudents(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error("Lỗi khi tải danh sách:", error);
     }
-    const data = await response.json();
-    setStudents(Array.isArray(data) ? data : []);
-  } catch (error) {
-    console.error("Lỗi khi tải danh sách:", error);
-  }
-};
+  };
 
   useEffect(() => {
     fetchStudents();
@@ -103,129 +103,136 @@ function App() {
 
   return (
     <div className="browser-mockup">
+      {/* Cập nhật thanh địa chỉ giả lập theo domain Render của bạn */}
       <div className="browser-address-bar">
-        https://quanly.sinhvien/dashboard
+        https://mern-frontend-236912.onrender.com
       </div>
 
-      <div className="main-card">
+      <header>
+
+        {/* Câu 45: Header hiển thị thông báo phiên bản 2.0 */}
         <div className="card-header">
-          <h1>MERN Stack Application - Version 2.0</h1>
+          <h1>Hệ Thống Quản Lý Sinh Viên</h1>
+          <p style={{
+            color: '#10b981',
+            fontWeight: 'bold',
+            marginTop: '8px',
+            fontSize: '15px'
+          }}>
+            Phiên bản 2.0 - Production Cloud PaaS (Auto-Deployed)
+          </p>
+        </div>
+      </header>
+
+      <div className="form-section">
+        <div className="sub-header">
+          {editingId ? "Cập nhật Thông tin Sinh viên" : "Thêm Sinh viên Mới"}
         </div>
 
-        <div className="form-section">
-          <div className="sub-header">
-            {editingId ? "Cập nhật Thông tin Sinh viên" : "Thêm Sinh viên Mới"}
+        <form onSubmit={handleSubmit}>
+          <div className="add-student-grid">
+            <div className="input-group">
+              <label htmlFor="studentId">Mã số Sinh viên:</label>
+              <input
+                id="studentId"
+                name="studentId"
+                placeholder="Ví dụ: 236912"
+                value={formData.studentId}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div className="input-group">
+              <label htmlFor="name">Họ tên Sinh viên:</label>
+              <input
+                id="name"
+                name="name"
+                placeholder="Ví dụ: Nguyễn Văn Dũng"
+                value={formData.name}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div className="input-group full-width-grid">
+              <label htmlFor="email">Email Liên hệ:</label>
+              <input
+                id="email"
+                name="email"
+                placeholder="Ví dụ: dung@example.com"
+                value={formData.email}
+                onChange={handleChange}
+                required
+              />
+            </div>
           </div>
 
-          <form onSubmit={handleSubmit}>
-            <div className="add-student-grid">
-              <div className="input-group">
-                <label htmlFor="studentId">Mã số Sinh viên:</label>
-                <input
-                  id="studentId"
-                  name="studentId"
-                  placeholder="Ví dụ: 236912"
-                  value={formData.studentId}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              <div className="input-group">
-                <label htmlFor="name">Họ tên Sinh viên:</label>
-                <input
-                  id="name"
-                  name="name"
-                  placeholder="Ví dụ: Nguyễn Văn Dũng"
-                  value={formData.name}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              <div className="input-group full-width-grid">
-                <label htmlFor="email">Email Liên hệ:</label>
-                <input
-                  id="email"
-                  name="email"
-                  placeholder="Ví dụ: dung@example.com"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="add-btn-container" style={{ display: 'flex', gap: '8px' }}>
-              <button type="submit" className="add-btn">
-                {editingId ? "Lưu thay đổi" : "Thêm sinh viên"}
+          <div className="add-btn-container" style={{ display: 'flex', gap: '8px' }}>
+            <button type="submit" className="add-btn">
+              {editingId ? "Lưu thay đổi" : "Thêm sinh viên"}
+            </button>
+            {editingId && (
+              <button
+                type="button"
+                className="add-btn"
+                style={{ backgroundColor: '#6c757d' }}
+                onClick={() => {
+                  setEditingId(null);
+                  setFormData({ studentId: '', name: '', email: '' });
+                }}
+              >
+                Hủy
               </button>
-              {editingId && (
-                <button
-                  type="button"
-                  className="add-btn"
-                  style={{ backgroundColor: '#6c757d' }}
-                  onClick={() => {
-                    setEditingId(null);
-                    setFormData({ studentId: '', name: '', email: '' });
-                  }}
-                >
-                  Hủy
-                </button>
-              )}
-            </div>
-          </form>
-        </div>
-
-        <div className="list-section">
-          <div className="sub-header">
-            Danh sách Sinh viên Hiện có
+            )}
           </div>
-
-          <table className="student-table">
-            <thead>
-              <tr>
-                <th>STT</th>
-                <th>MSSV</th>
-                <th>Họ tên</th>
-                <th>Email Liên hệ</th>
-                <th>Hành động</th>
-              </tr>
-            </thead>
-            <tbody>
-              {students.map((student, index) => (
-                <tr key={student._id || student.studentId || index}>
-                  <td>{index + 1}</td>
-                  <td>{student.studentId}</td>
-                  <td>{student.name}</td>
-                  <td>{student.email}</td>
-                  <td>
-                    <div className="action-icons">
-                      <button
-                        type="button"
-                        className="btn-action btn-edit"
-                        onClick={() => handleEdit(student)}
-                        title="Sửa"
-                      >
-                        ✏️
-                      </button>
-                      <button
-                        type="button"
-                        className="btn-action btn-delete"
-                        onClick={() => handleDelete(student._id || student.studentId)}
-                        title="Xóa"
-                      >
-                        🗑️
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        </form>
       </div>
 
-      <div className="browser-footer">
-        Dữ liệu được tải thành công. Sẵn sàng.
+      <div className="list-section">
+        <div className="sub-header">
+          Danh sách Sinh viên Hiện có
+        </div>
+
+        <table className="student-table">
+          <thead>
+            <tr>
+              <th>STT</th>
+              <th>MSSV</th>
+              <th>Họ tên</th>
+              <th>Email Liên hệ</th>
+              <th>Hành động</th>
+            </tr>
+          </thead>
+          <tbody>
+            {students.map((student, index) => (
+              <tr key={student._id || student.studentId || index}>
+                <td>{index + 1}</td>
+                <td>{student.studentId}</td>
+                <td>{student.name}</td>
+                <td>{student.email}</td>
+                <td>
+                  <div className="action-icons">
+                    <button
+                      type="button"
+                      className="btn-action btn-edit"
+                      onClick={() => handleEdit(student)}
+                      title="Sửa"
+                    >
+                      ✏️
+                    </button>
+                    <button
+                      type="button"
+                      className="btn-action btn-delete"
+                      onClick={() => handleDelete(student._id || student.studentId)}
+                      title="Xóa"
+                    >
+                      🗑️
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );
